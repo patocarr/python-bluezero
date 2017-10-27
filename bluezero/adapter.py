@@ -43,6 +43,12 @@ def list_adapters():
     else:
         return addresses
 
+def default_adapter():
+    adapters = list_adapters()
+    if len(adapters) > 0:
+        adapter_addr = adapters[0]
+    return adapter_addr
+
 
 class Adapter:
     """Bluetooth Adapter Class.
@@ -69,9 +75,7 @@ class Adapter:
         self.bus = dbus.SystemBus()
 
         if adapter_addr is None:
-            adapters = list_adapters()
-            if len(adapters) > 0:
-                adapter_addr = adapters[0]
+            adapter_addr = default_adapter()
 
         self.path = dbus_tools.get_dbus_path(adapter=adapter_addr)
         self.adapter_object = self.bus.get(
