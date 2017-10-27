@@ -6,8 +6,8 @@ Classes:
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-import dbus
-import dbus.mainloop.glib
+import pydbus as dbus
+
 try:
     from gi.repository import GLib as GObject
 except ImportError:
@@ -23,7 +23,7 @@ except ImportError:
 
 from bluezero import constants
 from bluezero import dbus_tools
-
+from bluezero import async_tools
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -47,20 +47,17 @@ class Device:
         :param device_addr: Address of the remote Bluetooth device.
         """
         self.bus = dbus.SystemBus()
-        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-        self.mainloop = GObject.MainLoop()
+        self.mainloop = async_tools.EventLoop()
 
         device_path = dbus_tools.get_dbus_path(adapter_addr, device_addr)
 
         self.remote_device_path = device_path
-        self.remote_device_obj = self.bus.get_object(
+        self.remote_device_obj = self.bus.get(
             constants.BLUEZ_SERVICE_NAME,
             self.remote_device_path)
-        self.remote_device_methods = dbus.Interface(
-            self.remote_device_obj,
-            constants.DEVICE_INTERFACE)
-        self.remote_device_props = dbus.Interface(self.remote_device_obj,
-                                                  dbus.PROPERTIES_IFACE)
+
+        self.remote_device_methods = self.remote_device_obj[constants.DEVICE_INTERFACE]
+        self.remote_device_props = self.remote_device_obj[constants.DBUS_PROP_IFACE]
 
     @property
     def address(self):
@@ -254,3 +251,4 @@ class Device:
     def disconnect(self):
         """Disconnect from the remote device."""
         self.remote_device_methods.Disconnect()
+
