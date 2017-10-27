@@ -83,15 +83,10 @@ class TestBluezeroAdapter(unittest.TestCase):
             'gi.repository': self.gobject_mock,
         }
 
-        #dbus_mock_iface = self.dbus_mock.Interface.return_value
         self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.GetManagedObjects.return_value = tests.obj_data.full_ubits
-        #dbus_mock_iface.GetManagedObjects.return_value = \
-        #    tests.obj_data.full_ubits
-#        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value = mock_get
-        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.Get.return_value = mock_get
-        #self.dbus_mock.Get = mock_get
-        self.dbus_mock.Set = mock_set
-        self.dbus_mock.GetAll = mock_get_all
+        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.Get = mock_get
+        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.Set = mock_set
+        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.GetAll = mock_get_all
 
         self.module_patcher = patch.dict('sys.modules', modules)
         self.module_patcher.start()
