@@ -95,7 +95,8 @@ class TestBluezeroAdapter(unittest.TestCase):
         self.module_under_test = adapter
         # self.adapter_device = 'hci0'  # Currently unused
         self.adapter_name = 'linaro-alip'
-        self.path = '/org/bluez/hci0'
+        #self.path = '/org/bluez/hci0'  Adapter constructor doesn't take a path
+        self.addr = '00:00:00:00:5A:AD' # but takes an address
 
     def tearDown(self):
         """
@@ -114,7 +115,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``address`` property.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         self.assertEqual(dongle.address, '00:00:00:00:5A:AD')
 
     def test_adapter_default(self):
@@ -128,7 +129,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the ``get_all()`` method for retrieving all the DBus properties.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         self.assertEqual(dongle.get_all(),
                          mock_get_all(constants.ADAPTER_INTERFACE))
 
@@ -136,7 +137,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``name`` property.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         self.assertEqual(dongle.name, self.adapter_name)
 
@@ -144,7 +145,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``alias`` property.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         self.assertEqual(dongle.alias, self.adapter_name)
 
@@ -153,7 +154,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         Test that an adapter ``alias`` can be set.
         """
         dev_name = 'my-test-dev'
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         dongle.alias = dev_name
         self.assertEqual(dongle.alias, dev_name)
@@ -162,7 +163,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``bt_class`` property.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         self.assertEqual(dongle.bt_class, 4980736)
 
@@ -170,7 +171,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``powered`` property.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         self.assertEqual(dongle.powered, 1)
 
@@ -178,7 +179,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test that the adapter ``powered`` property can be set.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         dongle.powered = 0
         self.assertEqual(dongle.powered, False)
@@ -187,7 +188,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``discoverable`` property.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         self.assertEqual(dongle.discoverable, False)
 
@@ -195,7 +196,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test that the adapter ``discoverable`` property can be set.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         dongle.discoverable = 1
         self.assertEqual(dongle.discoverable, True)
@@ -204,7 +205,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``pairable`` property.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         self.assertEqual(dongle.pairable, 1)
 
@@ -212,7 +213,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test that the adapter ``pairable`` property can be set.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         dongle.pairable = 0
         self.assertEqual(dongle.pairable, 0)
@@ -221,7 +222,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``pairabletimeout`` property.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         self.assertEqual(dongle.pairabletimeout, 0)
 
@@ -229,7 +230,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test that the adapter ``pairabletimeout`` property can be set.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         dongle.pairabletimeout = 220
         self.assertEqual(dongle.pairabletimeout, 220)
@@ -238,7 +239,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``discoverabletimeout`` property.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         self.assertEqual(dongle.discoverabletimeout, 180)
 
@@ -246,7 +247,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test that the adapter ``discoverabletimeout`` property can be set.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         dongle.discoverabletimeout = 220
         self.assertEqual(dongle.discoverabletimeout, 220)
@@ -255,7 +256,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``discovering`` property.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         self.assertEqual(dongle.discovering, False)
 
@@ -264,7 +265,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         """
         Test the adapter ``nearby_discovering()`` method.
         """
-        dongle = self.module_under_test.Adapter(self.path)
+        dongle = self.module_under_test.Adapter(self.addr)
         # test
         dongle.nearby_discovery()
         self.assertEqual(dongle.discovering, 1)
