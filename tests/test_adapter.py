@@ -6,8 +6,12 @@ imported as ``tests.obj_data``.
 """
 import sys
 import unittest
-from unittest.mock import MagicMock
-from unittest.mock import patch
+try:
+    from unittest.mock import MagicMock
+    from unittest.mock import patch
+except:
+    from mock import MagicMock
+    from mock import patch
 import tests.obj_data
 from bluezero import constants
 
@@ -33,6 +37,7 @@ def mock_get(iface, prop):
     :return: DBus property
     :rtype: *property dependent*
     """
+    print(mock_get_all(iface)[prop])
     return mock_get_all(iface)[prop]
 
 
@@ -73,17 +78,20 @@ class TestBluezeroAdapter(unittest.TestCase):
         self.gobject_mock = MagicMock()
 
         modules = {
-            'dbus': self.dbus_mock,
-            'dbus.mainloop.glib': self.mainloop_mock,
+            'pydbus': self.dbus_mock,
+            'pydbus.mainloop.glib': self.mainloop_mock,
             'gi.repository': self.gobject_mock,
         }
 
-        dbus_mock_iface = self.dbus_mock.Interface.return_value
-        dbus_mock_iface.GetManagedObjects.return_value = \
-            tests.obj_data.full_ubits
-        dbus_mock_iface.Get = mock_get
-        dbus_mock_iface.Set = mock_set
-        dbus_mock_iface.GetAll = mock_get_all
+        #dbus_mock_iface = self.dbus_mock.Interface.return_value
+        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.GetManagedObjects.return_value = tests.obj_data.full_ubits
+        #dbus_mock_iface.GetManagedObjects.return_value = \
+        #    tests.obj_data.full_ubits
+#        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value = mock_get
+        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.Get.return_value = mock_get
+        #self.dbus_mock.Get = mock_get
+        self.dbus_mock.Set = mock_set
+        self.dbus_mock.GetAll = mock_get_all
 
         self.module_patcher = patch.dict('sys.modules', modules)
         self.module_patcher.start()

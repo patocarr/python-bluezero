@@ -3,7 +3,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 # D-Bus imports
-import dbus
+import pydbus as dbus
 
 # python-bluezero imports
 from bluezero import constants
@@ -32,11 +32,7 @@ def list_adapters():
     """Return list of adapters address available on system."""
     paths = []
     addresses = []
-    bus = dbus.SystemBus()
-    manager = dbus.Interface(
-        bus.get_object(constants.BLUEZ_SERVICE_NAME, '/'),
-        constants.DBUS_OM_IFACE)
-    manager_obj = manager.GetManagedObjects()
+    manager_obj = dbus_tools.get_managed_objects()
     for path, ifaces in manager_obj.items():
         if constants.ADAPTER_INTERFACE in ifaces:
             paths.append(path)
@@ -78,28 +74,24 @@ class Adapter:
                 adapter_addr = adapters[0]
 
         self.path = dbus_tools.get_dbus_path(adapter=adapter_addr)
-        self.adapter_object = self.bus.get_object(
+        self.adapter_object = self.bus.get(
             constants.BLUEZ_SERVICE_NAME,
             self.path)
-        self.adapter_methods = dbus.Interface(self.adapter_object,
-                                              constants.ADAPTER_INTERFACE)
 
-        self.adapter_props = dbus.Interface(self.adapter_object,
-                                            dbus.PROPERTIES_IFACE)
+        self.adapter_methods = self.adapter_object[constants.ADAPTER_INTERFACE]
+
+        self.adapter_props = self.adapter_object[constants.DBUS_PROP_IFACE]
 
         self._nearby_timeout = 10
         self._nearby_count = 0
         self.mainloop = async_tools.EventLoop()
 
-        self.bus.add_signal_receiver(dbus_tools.interfaces_added,
-                                     dbus_interface=constants.DBUS_OM_IFACE,
-                                     signal_name='InterfacesAdded')
+        self.objmgr = self.bus.get(
+            constants.BLUEZ_SERVICE_NAME, '/')[constants.DBUS_OM_IFACE]
+        self.objmgr.InterfacesAdded.connect(dbus_tools.interfaces_added)
 
-        self.bus.add_signal_receiver(dbus_tools.properties_changed,
-                                     dbus_interface=dbus.PROPERTIES_IFACE,
-                                     signal_name='PropertiesChanged',
-                                     arg0=constants.DEVICE_INTERFACE,
-                                     path_keyword='path')
+        self.adapter_props.PropertiesChanged.connect( \
+                dbus_tools.properties_changed)
 
     @property
     def address(self):
