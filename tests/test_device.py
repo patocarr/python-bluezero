@@ -48,6 +48,7 @@ class TestBluezeroDevice(unittest.TestCase):
         self.dev_name = 'BBC micro:bit [zezet]'
         self.adapter_addr = '00:00:00:00:5A:AD'
         self.device_addr = 'D4:AE:95:4C:3E:A4'
+        self.bad_device_addr = '99:99:99:99:99:99'
 
     def tearDown(self):
         self.module_patcher.stop()
@@ -55,6 +56,14 @@ class TestBluezeroDevice(unittest.TestCase):
     def test_device_name(self):
         ble_dev = self.module_under_test.Device(self.adapter_addr, self.device_addr)
         self.assertEqual(ble_dev.name, self.dev_name)
+
+    def test_device_name_with_default_adapter(self):
+        ble_dev = self.module_under_test.Device(device_addr=self.device_addr)
+        self.assertEqual(ble_dev.name, self.dev_name)
+
+    def test_bad_device_addr_with_default_adapter(self):
+        ble_dev = self.module_under_test.Device
+        self.assertRaises(ValueError, ble_dev, device_addr=self.bad_device_addr)
 
     def test_connected(self):
         ble_dev = self.module_under_test.Device(self.adapter_addr, self.device_addr)
