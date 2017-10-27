@@ -12,13 +12,13 @@ except ImportError:
             pass
 
 # D-Bus import
-import dbus
-import dbus.mainloop.glib
+import pydbus as dbus
+from gi.repository import GLib
 
 # python-bluezero constants import
 from bluezero import constants
 
-dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+GLib.MainLoop()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -58,20 +58,19 @@ def interfaces_added(path, interfaces):
         logger.debug('Device added at {}'.format(path))
 
 
-def properties_changed(interface, changed, invalidated, path):
+def properties_changed(interface, changed, extra):
     """
     Callback for when properties are changed
     :param interface:
     :param changed:
-    :param invalidated:
-    :param path:
+    :param extra:
     :return:
     """
     if constants.DEVICE_INTERFACE in interface:
         for prop in changed:
             logger.debug(
-                '{}:{} Property {} new value {}'.format(interface,
-                                                        path,
+                '{}: Property {} new value {}'.format(interface,
+                                                        extra,
                                                         prop,
                                                         changed[prop]))
 
@@ -83,7 +82,7 @@ def get_dbus_obj(dbus_path):
     :return:
     """
     bus = dbus.SystemBus()
-    return bus.get_object(constants.BLUEZ_SERVICE_NAME, dbus_path)
+    return bus.get(constants.BLUEZ_SERVICE_NAME, dbus_path)
 
 
 def get_dbus_iface(iface, dbus_obj):
@@ -99,9 +98,8 @@ def get_dbus_iface(iface, dbus_obj):
 def get_managed_objects():
     """Return the objects currently managed by the DBus Object Manager."""
     bus = dbus.SystemBus()
-    manager = dbus.Interface(bus.get_object(
-        constants.BLUEZ_SERVICE_NAME, '/'),
-        constants.DBUS_OM_IFACE)
+    manager = bus.get(
+            constants.BLUEZ_SERVICE_NAME, '/')[constants.DBUS_OM_IFACE]
     return manager.GetManagedObjects()
 
 
@@ -116,15 +114,18 @@ def _get_dbus_path2(objects, parent_path, iface_in, prop, value):
     :param value: The value of the property being searched for
     :return: Path of object searched for
     """
-    if parent_path is None:
-        raise ValueError('Bad combination of inputs: found nothing')
-    for path, iface in objects.items():
-        props = iface.get(iface_in)
-        if props is None:
+    for obj in objects:
+        props = objects[obj]
+        path = obj
+        #print(" >Interface: {}".format(iface_in))
+        #print(" >Properties: {}".format(props))
+        #print(" >Path: {}".format(path))
+        if props is None or iface_in not in props.keys():
             continue
-        if props[prop].lower() == value.lower() and \
-                path.startswith(parent_path):
+        if props[iface_in][prop].lower() == value.lower() and \
+                parent_path is not None and path.startswith(parent_path):
             return path
+    raise ValueError('Bad combination of inputs: found nothing')
 
 
 def get_dbus_path(adapter=None,
@@ -141,11 +142,8 @@ def get_dbus_path(adapter=None,
     :param descriptor: GATT Descriptor UUID
     :return: DBus path
     """
-    bus = dbus.SystemBus()
-    manager = dbus.Interface(
-        bus.get_object(constants.BLUEZ_SERVICE_NAME, '/'),
-        constants.DBUS_OM_IFACE)
-    mngd_objs = manager.GetManagedObjects()
+    mngd_objs = get_managed_objects()
+    #print(mngd_objs)
 
     _dbus_obj_path = None
 
@@ -196,11 +194,7 @@ def get_profile_path(adapter,
     :param profile:
     :return:
     """
-    bus = dbus.SystemBus()
-    manager = dbus.Interface(
-        bus.get_object(constants.BLUEZ_SERVICE_NAME, '/'),
-        constants.DBUS_OM_IFACE)
-    mngd_objs = manager.GetManagedObjects()
+    mngd_objs = get_managed_objects()
 
     _dbus_obj_path = None
 

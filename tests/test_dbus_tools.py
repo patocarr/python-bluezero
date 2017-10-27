@@ -1,9 +1,15 @@
 import unittest
-from unittest.mock import MagicMock
-from unittest.mock import patch
+try:
+    from unittest.mock import MagicMock
+    from unittest.mock import patch
+except:
+    from mock import MagicMock
+    from mock import patch
+
 import tests.obj_data
 from bluezero import constants
 
+from gi.repository.GLib import Variant
 
 class TestDbusModuleCalls(unittest.TestCase):
     """
@@ -30,12 +36,12 @@ class TestDbusModuleCalls(unittest.TestCase):
         self.process_mock = MagicMock()
 
         modules = {
-            'dbus': self.dbus_mock,
-            'dbus.mainloop.glib': self.mainloop_mock,
+            'pydbus': self.dbus_mock,
+            'pydbus.mainloop.glib': self.mainloop_mock,
             'gi.repository': self.gobject_mock,
             'subprocess': self.process_mock
         }
-        self.dbus_mock.Interface.return_value.GetManagedObjects.return_value = tests.obj_data.full_ubits
+        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.GetManagedObjects.return_value = tests.obj_data.full_ubits
         self.process_mock.check_output = self.get_bluetooth_service
         self.process_mock.Popen.return_value.communicate.return_value = (b'5.43\n', None)
         self.module_patcher = patch.dict('sys.modules', modules)
