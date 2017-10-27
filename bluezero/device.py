@@ -24,6 +24,7 @@ except ImportError:
 from bluezero import constants
 from bluezero import dbus_tools
 from bluezero import async_tools
+from bluezero.adapter import default_adapter
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -37,7 +38,7 @@ class Device:
     Bluetooth device.
     """
 
-    def __init__(self, adapter_addr, device_addr):
+    def __init__(self, adapter_addr=None, device_addr=None):
         """Default initialiser.
 
         Creates object for the specified remote Bluetooth device.
@@ -48,6 +49,9 @@ class Device:
         """
         self.bus = dbus.SystemBus()
         self.mainloop = async_tools.EventLoop()
+
+        if adapter_addr is None:
+            adapter_addr = default_adapter()
 
         device_path = dbus_tools.get_dbus_path(adapter_addr, device_addr)
 
