@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 import tests.obj_data
 from bluezero import constants
+import pydbus
 
 adapter_props = tests.obj_data.full_ubits
 
@@ -32,13 +33,13 @@ class TestBluezeroCentral(unittest.TestCase):
         self.gobject_mock = MagicMock()
 
         modules = {
-            'dbus': self.dbus_mock,
-            'dbus.mainloop.glib': self.mainloop_mock,
+            'pydbus': self.dbus_mock,
+            'pydbus.mainloop.glib': self.mainloop_mock,
             'gi.repository': self.gobject_mock,
         }
-        self.dbus_mock.Interface.return_value.GetManagedObjects.return_value = tests.obj_data.full_ubits
-        self.dbus_mock.Interface.return_value.Get = mock_get
-        self.dbus_mock.Interface.return_value.Set = mock_set
+        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.GetManagedObjects.return_value = tests.obj_data.full_ubits
+        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.Get = mock_get
+        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.Set = mock_set
         self.module_patcher = patch.dict('sys.modules', modules)
         self.module_patcher.start()
         from bluezero import central
@@ -61,4 +62,10 @@ class TestBluezeroCentral(unittest.TestCase):
 
         # Test for the UUID
         self.assertEqual(test_central.connected, True)
+
+
+if __name__ == '__main__':
+    # avoid writing to stderr
+    unittest.main(testRunner=unittest.TextTestRunner(stream=sys.stdout,
+                                                            verbosity=2))
 

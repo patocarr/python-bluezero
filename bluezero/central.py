@@ -32,10 +32,11 @@ class Central:
             self.dongle.powered = True
             logger.debug('Adapter was off, now powered on')
 
+        self._characteristics = []
+        self._devices = {}
+
         if device_addr is not None:
             self.add_device(device_addr)
-
-        self._characteristics = []
 
     def add_device(self, device_addr):
         """
@@ -57,9 +58,9 @@ class Central:
         """
         # If no argument given, select last device from devices list
         if device_addr is not None:
-            rmt_device = _devices[-1]
+            rmt_device = self._devices[-1]
         else:
-            for dev in _devices:
+            for dev in self._devices:
                 if dev.address == device_addr:
                     rmt_device = dev
 
