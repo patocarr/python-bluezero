@@ -31,20 +31,40 @@ class Central:
         if not self.dongle.powered:
             self.dongle.powered = True
             logger.debug('Adapter was off, now powered on')
-        self.rmt_device = device.Device(self.dongle.address, device_addr)
+
+        if device_addr is not None:
+            self.add_device(device_addr)
 
         self._characteristics = []
 
-    def add_characteristic(self, srv_uuid, chrc_uuid):
+    def add_device(self, device_addr):
+        """
+        Add remote device of interest to device dictionary
+        :param device_addr: Remote device's 48-bit address
+        :return:
+        """
+        self.rmt_device = device.Device(self.dongle.address, device_addr)
+        self._devices[device_addr] = self.rmt_device
+
+    def add_characteristic(self, srv_uuid, chrc_uuid, device_addr=None):
         """
         Specify a characteristic of interest on the remote device by using
         the GATT Service UUID and Characteristic UUID
         :param srv_uuid: 128 bit UUID
         :param chrc_uuid: 128 bit UUID
+        :param device_addr: Optional remote device address (if more than one)
         :return:
         """
+        # If no argument given, select last device from devices list
+        if device_addr is not None:
+            rmt_device = _devices[-1]
+        else:
+            for dev in _devices:
+                if dev.address == device_addr:
+                    rmt_device = dev
+
         chrc_hndl = GATT.Characteristic(self.dongle.address,
-                                        self.rmt_device.address,
+                                        rmt_device.address,
                                         srv_uuid,
                                         chrc_uuid)
         self._characteristics.append(chrc_hndl)
