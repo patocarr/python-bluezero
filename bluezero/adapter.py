@@ -90,12 +90,9 @@ class Adapter:
         self._nearby_count = 0
         self.mainloop = async_tools.EventLoop()
 
-        self.objmgr = self.bus.get(
-            constants.BLUEZ_SERVICE_NAME, '/')[constants.DBUS_OM_IFACE]
-        self.objmgr.InterfacesAdded.connect(dbus_tools.interfaces_added)
+        self.interfacesadded_signal()
 
-        self.adapter_props.PropertiesChanged.connect( \
-                dbus_tools.properties_changed)
+        self.propertieschanged_signal()
 
     @property
     def address(self):
@@ -196,6 +193,27 @@ class Adapter:
         """Return whether the adapter is discovering."""
         return self.adapter_props.Get(
             constants.ADAPTER_INTERFACE, 'Discovering')
+    
+    def interfacesadded_signal(self, callback=None):
+        """
+        Set callback for when an interface is added to the adapter
+        """
+        self.objmgr = self.bus.get(
+            constants.BLUEZ_SERVICE_NAME, '/')[constants.DBUS_OM_IFACE]
+        if callback is None:
+            self.objmgr.InterfacesAdded.connect(dbus_tools.interfaces_added)
+        else:
+            self.objmgr.InterfacesAdded.connect(callback)
+
+    def propertieschanged_signal(self, callback=None):
+        """
+        Set callback for when a property changes in the adapter
+        """
+        if callback is None:
+            self.adapter_props.PropertiesChanged.connect( \
+                dbus_tools.properties_changed)
+        else:
+            self.adapter_props.PropertiesChanged.connect(callback)
 
     def _discovering_timeout(self):
         """Test to see if discovering should stop."""

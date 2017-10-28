@@ -52,6 +52,9 @@ def mock_set(iface, prop, value):
     """
     tests.obj_data.full_ubits['/org/bluez/hci0'][iface][prop] = value
 
+def mock_callback():
+    return True
+
 
 class TestBluezeroAdapter(unittest.TestCase):
     """
@@ -84,6 +87,7 @@ class TestBluezeroAdapter(unittest.TestCase):
         }
 
         self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.GetManagedObjects.return_value = tests.obj_data.full_ubits
+        self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.InterfacesAdded.side_effect = mock_callback
         self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.Get = mock_get
         self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.Set = mock_set
         self.dbus_mock.SystemBus.return_value.get.return_value.__getitem__.return_value.GetAll = mock_get_all
@@ -270,6 +274,13 @@ class TestBluezeroAdapter(unittest.TestCase):
         dongle.nearby_discovery()
         self.assertEqual(dongle.discovering, 1)
 
+    @unittest.skip('mock of signal callback not implemented')
+    def test_interfacesadded_callback(self):
+        """
+        Test the adapter ``InterfacesAdded`` signal.
+        """
+        dongle = self.module_under_test.Adapter(self.addr)
+        dongle.interfacesadded_signal(mock_callback)
 
 if __name__ == '__main__':
     # avoid writing to stderr
