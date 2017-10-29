@@ -1,7 +1,7 @@
 """Classes that represent the GATT features of a remote device."""
 
-import dbus
-import dbus.mainloop.glib
+import pydbus as dbus
+#import dbus.mainloop.glib
 try:
     from gi.repository import GObject
 except ImportError:
@@ -19,7 +19,7 @@ from bluezero import constants
 from bluezero import dbus_tools
 from bluezero import device
 
-dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+#dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -394,14 +394,10 @@ class Profile:
                                                         device_addr,
                                                         profile_uuid)
         self.bus = dbus.SystemBus()
-        self.profile_object = self.bus.get_object(
-            constants.BLUEZ_SERVICE_NAME,
-            self.profile_path)
-        self.profile_methods = dbus.Interface(
-            self.profile_object,
-            constants.GATT_PROFILE_IFACE)
-        self.profile_props = dbus.Interface(self.profile_object,
-                                            dbus.PROPERTIES_IFACE)
+        self.profile_object = self.bus.get(
+            constants.BLUEZ_SERVICE_NAME)[self.profile_path]
+        self.profile_methods = self.profile_object[constants.GATT_PROFILE_IFACE]
+        self.profile_props = self.profile_object[constants.DBUS_PROP_IFACE]
 
     def release(self):
         """
@@ -448,14 +444,10 @@ class GattManager:
         """
         self.manager_path = dbus_tools.get_dbus_path(adapter_addr)
         self.bus = dbus.SystemBus()
-        self.manager_obj = self.bus.get_object(
-            constants.BLUEZ_SERVICE_NAME,
-            self.manager_path)
-        self.manager_methods = dbus.Interface(
-            self.manager_obj,
-            constants.GATT_MANAGER_IFACE)
-        self.manager_props = dbus.Interface(self.manager_obj,
-                                            dbus.PROPERTIES_IFACE)
+        self.manager_obj = self.bus.get(
+            constants.BLUEZ_SERVICE_NAME)[self.manager_path]
+        self.manager_methods = self.manager_obj[constants.GATT_MANAGER_IFACE]
+        self.manager_props = self.manager_obj[constants.DBUS_PROP_IFACE]
 
     def register_application(self, application, options):
         """
