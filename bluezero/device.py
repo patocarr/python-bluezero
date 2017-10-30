@@ -52,6 +52,7 @@ class Device:
 
         if adapter_addr is None:
             adapter_addr = default_adapter()
+        self.adapter_addr = adapter_addr
 
         device_path = dbus_tools.get_dbus_path(adapter_addr, device_addr)
 

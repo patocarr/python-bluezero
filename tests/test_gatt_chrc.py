@@ -3,6 +3,7 @@ import sys
 import unittest
 try:
     from unittest.mock import MagicMock
+    from unittest.mock import Mock
     from unittest.mock import patch
 except:
     from mock import MagicMock
@@ -14,16 +15,16 @@ import pydbus
 
 def mock_get(iface, prop):
     if iface == 'org.bluez.Device1':
-        return tests.obj_data.full_ubits['/org/bluez/hci0/dev_E4_43_33_7E_54_1C'][iface][prop]
+        return tests.obj_data.full_ubits['/org/bluez/hci0/dev_F7_17_E4_09_C0_C6'][iface][prop]
     else:
-        return tests.obj_data.full_ubits['/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service002a'][iface][prop]
+        return tests.obj_data.full_ubits['/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0020/char0025'][iface][prop]
 
 def mock_set(iface, prop, value):
-    tests.obj_data.full_ubits['/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service002a'][iface][prop] = value
+    tests.obj_data.full_ubits['/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0020/char0025'][iface][prop] = value
 
 
-class TestBluezeroService(unittest.TestCase):
-    """Test class to exercise (remote) GATT Service Features."""
+class TestBluezeroCharacteristic(unittest.TestCase):
+    """Test class to exercise (remote) GATT Characteristic Features."""
 
     def setUp(self):
         """Initialise the class for the tests."""
@@ -44,46 +45,38 @@ class TestBluezeroService(unittest.TestCase):
         from bluezero import GATT
         from bluezero import device
         self.module_under_test = GATT
-        self.path = '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service002a'
         self.adapter_path = '/org/bluez/hci0'
         self.dev_name = 'BBC micro:bit [zezet]'
         self.adapter_addr = '00:00:00:00:5A:AD'
-        self.device_addr = 'E4:43:33:7E:54:1C'
-        self.service_uuid = 'e95dd91d-251d-470a-a062-fa1922dfa9a8'
+        self.device_addr = 'F7:17:E4:09:C0:C6'
+        self.service_uuid = 'e95d127b-251d-470a-a062-fa1922dfa9a8'
+        self.chrc_uuid = 'e95dd822-251d-470a-a062-fa1922dfa9a8'
         self.test_device = device.Device(self.adapter_addr, self.device_addr)
 
     def tearDown(self):
         self.module_patcher.stop()
 
-    def test_service_uuid(self):
-        """Test the service UUID."""
+    def test_chrc_uuid(self):
+        """Test the characteristic UUID."""
         # Invoke the bluez GATT library to access the mock GATT service
-        test_service = self.module_under_test.Service(self.test_device,
-                                                      self.service_uuid)
+        test_chrc = self.module_under_test.Characteristic(\
+                self.test_device, \
+                self.service_uuid, \
+                self.chrc_uuid)
 
         # Test for the UUID
-        self.assertEqual(test_service.UUID, 'e95dd91d-251d-470a-a062-fa1922dfa9a8')
+        self.assertEqual(test_chrc.UUID, 'e95dd822-251d-470a-a062-fa1922dfa9a8')
 
-    def test_service_device(self):
-        """Test the service device path."""
+    def test_chrc_flags(self):
+        """Test the characteristic flags."""
         # Invoke the bluez GATT library to access the mock GATT service
-        test_service = self.module_under_test.Service(self.test_device,
-                                                      self.service_uuid)
-
-        # Test for the device path
-        dev_underscore = self.device_addr.replace(':', '_').upper()
-        dev_addr = '{0}/dev_{1}'.format(self.adapter_path, dev_underscore)
-        self.assertEqual(test_service.device, dev_addr)
-
-    def test_service_primary(self):
-        """Test the service primary flag."""
-        # Invoke the bluez GATT library to access the mock GATT service
-        test_service = self.module_under_test.Service(self.test_device,
-                                                      self.service_uuid)
+        test_chrc = self.module_under_test.Characteristic(\
+                self.test_device, \
+                self.service_uuid, \
+                self.chrc_uuid)
 
         # Test for the UUID
-        self.assertEqual(test_service.primary, True)
-
+        self.assertEqual(test_chrc.flags, ['write'])
 
 if __name__ == '__main__':
     # avoid writing to stderr

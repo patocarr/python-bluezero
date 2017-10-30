@@ -29,7 +29,7 @@ logger.addHandler(NullHandler())
 class Service:
     """Remote GATT Service."""
 
-    def __init__(self, adapter_addr, device_addr, srv_uuid):
+    def __init__(self, rmt_device, srv_uuid):
         """
         Remote GATT Service Initialisation.
 
@@ -37,10 +37,9 @@ class Service:
         :param device_addr: device address.
         :param srv_uuid: Service UUID.
         """
-        self.adapter_addr = adapter_addr
-        self.device_addr = device_addr
+        self.rmt_device = rmt_device
+        self.adapter_addr = rmt_device.adapter_addr
         self.srv_uuid = srv_uuid
-        self.rmt_device = device.Device(adapter_addr, device_addr)
         self.service_methods = None
         self.service_props = None
 
@@ -53,12 +52,14 @@ class Service:
         :return:
         """
         if self.rmt_device.services_resolved:
-            self.service_methods = dbus_tools.get_methods(self.adapter_addr,
-                                                          self.device_addr,
-                                                          self.srv_uuid)
-            self.service_props = dbus_tools.get_props(self.adapter_addr,
-                                                      self.device_addr,
-                                                      self.srv_uuid)
+            self.service_methods = dbus_tools.get_methods( \
+                    self.adapter_addr, \
+                    self.rmt_device.address, \
+                    self.srv_uuid)
+            self.service_props = dbus_tools.get_props( \
+                    self.adapter_addr, \
+                    self.rmt_device.address, \
+                    self.srv_uuid)
 
     @property
     def UUID(self):
@@ -94,7 +95,7 @@ class Service:
 class Characteristic:
     """Remote GATT Characteristic."""
 
-    def __init__(self, adapter_addr, device_addr, srv_uuid, chrc_uuid):
+    def __init__(self, rmt_device, srv_uuid, chrc_uuid):
         """
         Remote GATT Characteristic Initialisation.
 
@@ -103,13 +104,15 @@ class Characteristic:
         :param srv_uuid: Service UUID.
         :param chrc_uuid: Characteristic UUID.
         """
-        self.adapter_addr = adapter_addr
-        self.device_addr = device_addr
-        self.rmt_device = device.Device(adapter_addr, device_addr)
+        self.adapter_addr = rmt_device.adapter_addr
+        self.rmt_device = rmt_device
         self.srv_uuid = srv_uuid
         self.chrc_uuid = chrc_uuid
         self.characteristic_methods = None
         self.characteristic_props = None
+
+        if self.rmt_device.services_resolved:
+            self.resolve_gatt()
 
     def resolve_gatt(self):
         """
@@ -120,12 +123,12 @@ class Characteristic:
         if self.rmt_device.services_resolved:
             self.characteristic_methods = dbus_tools.get_methods(
                 self.adapter_addr,
-                self.device_addr,
+                self.rmt_device.address, \
                 self.srv_uuid,
                 self.chrc_uuid)
             self.characteristic_props = dbus_tools.get_props(
                 self.adapter_addr,
-                self.device_addr,
+                self.rmt_device.address, \
                 self.srv_uuid,
                 self.chrc_uuid)
             return True
@@ -139,6 +142,7 @@ class Characteristic:
 
         :return: string example '00002a00-0000-1000-8000-00805f9b34fb'
         """
+        print (self.characteristic_props)
         return self.characteristic_props.Get(
             constants.GATT_CHRC_IFACE, 'UUID')
 
