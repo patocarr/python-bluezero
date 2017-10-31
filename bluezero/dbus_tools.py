@@ -92,7 +92,7 @@ def get_dbus_iface(iface, dbus_obj):
     :param dbus_obj:
     :return:
     """
-    return dbus.Interface(dbus_obj, iface)
+    return dbus_obj[iface]
 
 
 def get_managed_objects():
@@ -301,4 +301,5 @@ def get_props(adapter=None,
                              characteristic,
                              descriptor)
 
-    return get_dbus_iface(dbus.PROPERTIES_IFACE, get_dbus_obj(path_obj))
+    return get_dbus_iface(constants.DBUS_OM_IFACE, get_dbus_obj(path_obj))
+
