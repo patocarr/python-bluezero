@@ -143,7 +143,6 @@ def get_dbus_path(adapter=None,
     :return: DBus path
     """
     mngd_objs = get_managed_objects()
-    #print(mngd_objs)
 
     _dbus_obj_path = None
 
@@ -302,4 +301,86 @@ def get_props(adapter=None,
                              descriptor)
 
     return get_dbus_iface(constants.DBUS_OM_IFACE, get_dbus_obj(path_obj))
+
+
+
+def _get_dbus_paths(objects, parents, iface_in, prop, value):
+    """
+    Find DBus paths for given DBus interface with property of a given value.
+
+    :param objects: Dictionary of objects to search
+    :param iface_in: The interface of interest
+    :param prop: The property to search for
+    :param value: The value of the property being searched for
+    :return: List of path of objects searched for
+    """
+    paths = []
+    for obj in objects:
+        props = objects[obj]
+        path = obj
+        if props is None or iface_in not in props.keys():
+            continue
+        for p in parents:
+            if props[iface_in][prop].lower() == value.lower() and \
+                    p in path:
+                #print(" >Interface: {}".format(iface_in))
+                #print(" >Properties: {}".format(props))
+                #print(" >Path: {}".format(path))
+                #print(" >Properties: {}".format(props[iface_in][prop]))
+                paths.append(path)
+    return paths
+
+
+def get_dbus_paths(adapter=None,
+                  device=None,
+                  service=None,
+                  characteristic=None,
+                  descriptor=None):
+    """
+    Return all DBus paths for the given properties
+    :param adapter: Adapter address
+    :param device: Device address
+    :param service: GATT Service UUID
+    :param characteristic: GATT Characteristic UUID
+    :param descriptor: GATT Descriptor UUID
+    :return: DBus paths list
+    """
+    mngd_objs = get_managed_objects()
+    parents = ['/org/bluez']
+
+    if adapter is not None:
+        parents = _get_dbus_paths(mngd_objs,
+                                  parents,
+                                  constants.ADAPTER_INTERFACE,
+                                  'Address',
+                                  adapter)
+
+    if device is not None:
+        parents = _get_dbus_paths(mngd_objs,
+                                  parents,
+                                  constants.DEVICE_INTERFACE,
+                                  'Address',
+                                  device)
+
+    if service is not None:
+        parents = _get_dbus_paths(mngd_objs,
+                                  parents,
+                                  constants.GATT_SERVICE_IFACE,
+                                  'UUID',
+                                  service)
+
+    if characteristic is not None:
+        parents = _get_dbus_paths(mngd_objs,
+                                  parents,
+                                  constants.GATT_CHRC_IFACE,
+                                  'UUID',
+                                  characteristic)
+
+    if descriptor is not None:
+        parents = _get_dbus_paths(mngd_objs,
+                                  parents,
+                                  constants.GATT_DESC_IFACE,
+                                  'UUID',
+                                  descriptor)
+    return parents
 

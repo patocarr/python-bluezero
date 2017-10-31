@@ -61,6 +61,118 @@ class TestDbusModuleCalls(unittest.TestCase):
         expected_result = '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0031/char0035/desc0037'
         self.assertEqual(dbus_full_path, expected_result)
 
+    def test_dev_paths(self):
+        """ Test getting all device paths with the given device address """
+        dbus_paths = self.module_under_test.get_dbus_paths(\
+                device='E4:43:33:7E:54:B1' \
+                )
+        expected_result = [
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_B1']
+        self.assertEqual(dbus_paths, expected_result)
+
+    def test_service_paths(self):
+        """ Test getting all service paths with the given service UUID """
+        dbus_paths = self.module_under_test.get_dbus_paths(\
+                service='e95df2d8-251d-470a-a062-fa1922dfa9a8'
+                )
+        expected_result = [
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0031',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0031',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0031',
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0031']
+        self.assertEqual(dbus_paths, expected_result)
+
+    def test_chrc_paths(self):
+        """ Test getting all characteristic paths with the given char UUID """
+        dbus_paths = self.module_under_test.get_dbus_paths(\
+                characteristic='e95d9715-251d-470a-a062-fa1922dfa9a8' \
+                )
+        expected_result = [
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0031/char0035',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0031/char0035',
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0031/char0035',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0031/char0035']
+        self.assertEqual(dbus_paths, expected_result)
+
+    def test_serv_and_chrc_paths(self):
+        """ Test getting all characteristic paths with the given char UUID """
+        dbus_paths = self.module_under_test.get_dbus_paths(\
+                service='e95df2d8-251d-470a-a062-fa1922dfa9a8', \
+                characteristic='e95d9715-251d-470a-a062-fa1922dfa9a8' \
+                )
+        expected_result = [
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0031/char0035',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0031/char0035',
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0031/char0035',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0031/char0035']
+        self.assertEqual(dbus_paths, expected_result)
+
+    def test_dev_and_chrc_paths(self):
+        """ Test getting all characteristic paths with the given device
+        address and char UUID """
+        dbus_paths = self.module_under_test.get_dbus_paths(\
+                device='E4:43:33:7E:54:B1', \
+                characteristic='0000FFF3-0000-1000-8000-00805F9B34FB' \
+                )
+        expected_result = [
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_B1/service0031/char0035']
+        self.assertEqual(dbus_paths, expected_result)
+
+    def test_chrc_and_desc_paths(self):
+        """ Test getting all characteristic paths with the given device
+        address and char UUID """
+        dbus_paths = self.module_under_test.get_dbus_paths(\
+                characteristic='00002a05-0000-1000-8000-00805f9b34fb',
+                descriptor= '00002902-0000-1000-8000-00805f9b34fb'
+                )
+        expected_result = [\
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0008/char0009/desc000b', \
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0008/char0009/desc000b', \
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0008/char0009/desc000b', \
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0008/char0009/desc000b']
+
+        self.assertEqual(dbus_paths, expected_result)
+
+    def test_desc_paths(self):
+        """ Test getting all descriptor paths with the given UUID """
+        dbus_paths = self.module_under_test.get_dbus_paths(\
+                descriptor= '00002902-0000-1000-8000-00805f9b34fb'
+                )
+        expected_result = [
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0031/char0032/desc0034',
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0013/char0014/desc0016',
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0031/char0032/desc0034',
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0008/char0009/desc000b',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0020/char0027/desc0029',
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0020/char0027/desc0029',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0019/char001a/desc001c',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0031/char0035/desc0037',
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service003a/char003b/desc003d',
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0031/char0035/desc0037',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0013/char0014/desc0016',
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0031/char0035/desc0037',
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0020/char0027/desc0029',
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0019/char001a/desc001c',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0019/char001a/desc001c',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0019/char001d/desc001f',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service003a/char003b/desc003d',
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0019/char001a/desc001c',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0031/char0032/desc0034',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service003a/char003b/desc003d',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0008/char0009/desc000b',
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0008/char0009/desc000b',
+                '/org/bluez/hci0/dev_E4_43_33_7E_54_1C/service0019/char001d/desc001f',
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0013/char0014/desc0016',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0013/char0014/desc0016',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0020/char0027/desc0029',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0031/char0035/desc0037',
+                '/org/bluez/hci0/dev_EB_F6_95_27_84_A0/service0008/char0009/desc000b',
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service0019/char001d/desc001f',
+                '/org/bluez/hci0/dev_FD_6B_11_CD_4A_9B/service003a/char003b/desc003d',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0019/char001d/desc001f',
+                '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0031/char0032/desc0034']
+        self.assertEqual(dbus_paths, expected_result)
+
     def test_bad_path(self):
         self.assertRaises(ValueError,
                           self.module_under_test.get_dbus_path,
