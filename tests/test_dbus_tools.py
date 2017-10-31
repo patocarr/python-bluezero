@@ -53,11 +53,12 @@ class TestDbusModuleCalls(unittest.TestCase):
         self.module_patcher.stop()
 
     def test_uuid_path_gatt(self):
-        dbus_full_path = self.module_under_test.get_dbus_path(adapter='00:00:00:00:5A:AD',
-                                                              device='F7:17:E4:09:C0:C6',
-                                                              service='e95df2d8-251d-470a-a062-fa1922dfa9a8',
-                                                              characteristic='e95d9715-251d-470a-a062-fa1922dfa9a8',
-                                                              descriptor='00002902-0000-1000-8000-00805f9b34fb')
+        dbus_full_path = self.module_under_test.get_dbus_path(\
+                adapter='00:00:00:00:5A:AD',
+                device='F7:17:E4:09:C0:C6',
+                service='e95df2d8-251d-470a-a062-fa1922dfa9a8',
+                characteristic='e95d9715-251d-470a-a062-fa1922dfa9a8',
+                descriptor='00002902-0000-1000-8000-00805f9b34fb')
         expected_result = '/org/bluez/hci0/dev_F7_17_E4_09_C0_C6/service0031/char0035/desc0037'
         self.assertEqual(dbus_full_path, expected_result)
 
@@ -188,6 +189,7 @@ class TestDbusModuleCalls(unittest.TestCase):
                                                     descriptor='00002902-0000-1000-8000-00805f9b34fb')
         self.assertEqual(constants.GATT_DESC_IFACE, my_iface)
 
+    @unittest.skip('No profile information on database')
     def test_profile_path(self):
         my_iface = self.module_under_test.get_profile_path(adapter='00:00:00:00:5A:AD',
                                                            device='F7:17:E4:09:C0:C6',
@@ -210,4 +212,4 @@ class TestDbusModuleCalls(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
