@@ -280,20 +280,19 @@ class Characteristic:
 class Descriptor:
     """Remote GATT Descriptor."""
 
-    def __init__(self, adapter_addr, device_addr,
+    def __init__(self, rmt_device,
                  srv_uuid, chrc_uuid, dscr_uuid):
         """
         Remote GATT Descriptor Initialisation.
 
-        :param adapter_addr: Adapter address.
-        :param device_addr: device address.
+        :param rmt_device: Remote device
         :param srv_uuid: Service UUID.
         :param chrc_uuid: Characteristic UUID.
         :param dscr_uuid: Descriptor UUID.
         """
-        self.adapter_addr = adapter_addr
-        self.device_addr = device_addr
-        self.rmt_device = device.Device(adapter_addr, device_addr)
+        self.adapter_addr = rmt_device.adapter_addr
+        self.device_addr = rmt_device.address
+        self.rmt_device = rmt_device
         self.srv_uuid = srv_uuid
         self.chrc_uuid = chrc_uuid
         self.dscr_uuid = dscr_uuid
@@ -308,15 +307,19 @@ class Descriptor:
         Get the methods and properties for the discovered Descriptors
         :return:
         """
-        if self.device_props.services_resolved:
-            self.descriptor_methods = dbus_tools.get_methods(self.adapter_addr,
-                                                             self.device_addr,
-                                                             self.srv_uuid,
-                                                             self.dscr_uuid)
-            self.descriptor_props = dbus_tools.get_props(self.adapter_addr,
-                                                         self.device_addr,
-                                                         self.srv_uuid,
-                                                         self.dscr_uuid)
+        if self.rmt_device.remote_device_props.services_resolved:
+            self.descriptor_methods = dbus_tools.get_methods(\
+                    self.adapter_addr,
+                    self.device_addr,
+                    self.srv_uuid,
+                    self.chrc_uuid,
+                    self.dscr_uuid)
+            self.descriptor_props = dbus_tools.get_props(\
+                    self.adapter_addr,
+                    self.device_addr,
+                    self.srv_uuid,
+                    self.chrc_uuid,
+                    self.dscr_uuid)
 
     @property
     def UUID(self):
@@ -334,7 +337,7 @@ class Descriptor:
 
         :return: DBus object
         """
-        return self.descriptor_props.Get(constants.GATT_DESC_IFACE, 'UUID')
+        return self.descriptor_props.Get(constants.GATT_DESC_IFACE, 'Characteristic')
 
     @property
     def value(self):
@@ -347,17 +350,7 @@ class Descriptor:
         :return: DBus byte array
         """
         return self.descriptor_props.Get(
-            constants.GATT_CHRC_IFACE, 'Value')
-
-    @property
-    def flags(self):
-        """
-        Return a list of how this descriptor value can be used.
-
-        :return: list example ['read', 'write']
-        """
-        return self.descriptor_props.Get(
-            constants.GATT_CHRC_IFACE, 'Flags')
+            constants.GATT_DESC_IFACE, 'Value')
 
     def read_raw_value(self, flags=''):
         """
