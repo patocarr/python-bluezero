@@ -104,6 +104,10 @@ class Central:
             sleep(0.5)
         self.load_gatt()
 
+    @property
+    def get_devices(self):
+        return [addr for addr in self._devices.keys()]
+
     def disconnect(self):
         """Disconnect from the remote device."""
         self.rmt_device.disconnect()

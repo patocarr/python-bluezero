@@ -49,19 +49,33 @@ class TestBluezeroCentral(unittest.TestCase):
         self.dev_name = 'BBC micro:bit [zezet]'
         self.adapter_addr = '00:00:00:00:5A:AD'
         self.device_addr = 'E4:43:33:7E:54:1C'
+        self.device2_addr = 'FD:6B:11:CD:4A:9B'
         self.service_uuid = 'e95dd91d-251d-470a-a062-fa1922dfa9a8'
 
     def tearDown(self):
         self.module_patcher.stop()
 
-    def test_service_uuid(self):
-        """Test the central instantiation."""
-        # Invoke the bluez GATT library to access the mock GATT service
-        test_central = self.module_under_test.Central(adapter_addr=self.adapter_addr,
-                                                      device_addr=self.device_addr)
-
-        # Test for the UUID
+    def test_central_default(self):
+        """Test the central default instantiation."""
+        test_central = self.module_under_test.Central()
+        test_central.add_device(self.device_addr)
         self.assertEqual(test_central.connected, True)
+
+    def test_dev_connected(self):
+        """Test the central instantiation."""
+        test_central = self.module_under_test.Central(\
+                adapter_addr=self.adapter_addr,
+                device_addr=self.device_addr)
+        self.assertEqual(test_central.connected, True)
+
+    def test_get_devices(self):
+        """Test the central instantiation."""
+        test_central = self.module_under_test.Central(\
+                device_addr=self.device_addr)
+        test_central.add_device(self.device2_addr)
+        self.assertEqual(test_central.get_devices, [\
+                self.device_addr, \
+                self.device2_addr])
 
 
 if __name__ == '__main__':
