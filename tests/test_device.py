@@ -2,9 +2,11 @@ import unittest
 try:
     from unittest.mock import MagicMock
     from unittest.mock import patch
+    from unittest.mock import call
 except:
     from mock import MagicMock
     from mock import patch
+    from mock import call
 import tests.obj_data
 from bluezero import constants
 import pydbus
@@ -29,6 +31,7 @@ class TestBluezeroDevice(unittest.TestCase):
         self.dbus_mock = MagicMock()
         self.mainloop_mock = MagicMock()
         self.gobject_mock = MagicMock()
+        self.callback = MagicMock()
 
         modules = {
             'pydbus': self.dbus_mock,
@@ -158,6 +161,16 @@ class TestBluezeroDevice(unittest.TestCase):
     def test_services_resolved(self):
         ble_dev = self.module_under_test.Device(self.adapter_addr, self.device_addr)
         self.assertEqual(ble_dev.services_resolved, False)
+
+    def test_properties_changed_signal(self):
+        """
+        Test device "PropertiesChanged" signal calling the set callback function
+        """
+        ble_dev = self.module_under_test.Device(self.adapter_addr, self.device_addr)
+        ble_dev.properties_changed(self.callback)
+        ble_dev.remote_device_props_changed_cb('arg1', 'arg2')
+        self.assertTrue(self.callback.called)
+        self.assertEqual(self.callback.call_args, call('arg1', 'arg2'))
 
     @unittest.skip('Not in BlueZ 5.42')
     def test_adverting_flags(self):

@@ -63,6 +63,7 @@ class Device:
 
         self.remote_device_methods = self.remote_device_obj[constants.DEVICE_INTERFACE]
         self.remote_device_props = self.remote_device_obj[constants.DBUS_PROP_IFACE]
+        self.remote_device_props_changed_cb = None
 
     @property
     def address(self):
@@ -241,6 +242,15 @@ class Device:
         return self.remote_device_props.Get(
             constants.DEVICE_INTERFACE,
             'ServicesResolved')
+
+    def properties_changed(self, callback=None):
+        """
+        Set callback function for when a device property changes.
+        """
+        if callback is None:
+            callback = self.remote_device_props.PropertiesChanged.connect(dbus_tools.properties_changed)
+        self.remote_device_props.PropertiesChanged.connect(callback)
+        self.remote_device_props_changed_cb = callback
 
     def connect(self, profile=None):
         """
