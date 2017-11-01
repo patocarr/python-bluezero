@@ -22,7 +22,7 @@ logger.addHandler(NullHandler())
 class Central:
     """Create a BLE instance taking the Central role."""
 
-    def __init__(self, device_addr, adapter_addr=None):
+    def __init__(self, device_addr=None, adapter_addr=None):
         if adapter_addr is None:
             self.dongle = adapter.Adapter()
             logger.debug('Adapter is: {}'.format(self.dongle.address))
@@ -42,10 +42,11 @@ class Central:
         """
         Add remote device of interest to device dictionary
         :param device_addr: Remote device's 48-bit address
-        :return:
+        :return: the newly added device
         """
         self.rmt_device = device.Device(self.dongle.address, device_addr)
         self._devices[device_addr] = self.rmt_device
+        return self.rmt_device
 
     def add_characteristic(self, srv_uuid, chrc_uuid, device_addr=None):
         """
@@ -64,8 +65,7 @@ class Central:
                 if dev.address == device_addr:
                     rmt_device = dev
 
-        chrc_hndl = GATT.Characteristic(self.dongle.address,
-                                        rmt_device.address,
+        chrc_hndl = GATT.Characteristic(rmt_device,
                                         srv_uuid,
                                         chrc_uuid)
         self._characteristics.append(chrc_hndl)

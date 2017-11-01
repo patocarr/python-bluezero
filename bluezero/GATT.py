@@ -99,8 +99,7 @@ class Characteristic:
         """
         Remote GATT Characteristic Initialisation.
 
-        :param adapter_addr: Adapter address.
-        :param device_addr: device address.
+        :param rmt_device: remote device instance.
         :param srv_uuid: Service UUID.
         :param chrc_uuid: Characteristic UUID.
         """
